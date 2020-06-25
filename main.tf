@@ -11,6 +11,14 @@ terraform {
   }
 }
 
+# Learn our public IP address
+data "http" "ifconfig" {
+   url = "http://ifconfig.io"
+  request_headers = {
+      User-Agent= "curl/7.64.1"
+  }
+}
+
 resource "aws_vpc" "main" {
   cidr_block       = "10.0.0.0/16"
   instance_tenancy = "dedicated"
@@ -44,7 +52,8 @@ resource "aws_instance" "web" {
   ami           = "ami-06c119f12fa66b35b"
   instance_type = "t3.small"
   subnet_id     = aws_subnet.mainb.id
-  security_groups = [aws_security_group.allow_all.id]
+  vpc_security_group_ids = [aws_security_group.allow_all.id]
+//  security_groups = [aws_security_group.allow_all.id]
   key_name = "OnPrem"
   tags = {
     Name = "HelloWorld"
@@ -66,7 +75,7 @@ resource "aws_subnet" "mainc" {
 
 resource "aws_customer_gateway" "main" {
   bgp_asn    = 65000
-  ip_address = "97.117.69.79"
+  ip_address = "${chomp(data.http.ifconfig.body)}"
   type       = "ipsec.1"
 
   tags = {
@@ -120,3 +129,7 @@ resource "aws_vpn_connection" "main" {
         }
 
 }
+
+//output "public_ip" {
+//  value = "${chomp(data.http.ifconfig.body)}"
+//}
