@@ -50,7 +50,7 @@ resource "aws_subnet" "mainb" {
 
 resource "aws_instance" "web" {
   ami           = "ami-06c119f12fa66b35b"
-  instance_type = "t3.small"
+  instance_type = "t2.nano"
   subnet_id     = aws_subnet.mainb.id
   vpc_security_group_ids = [aws_security_group.allow_all.id]
 //  security_groups = [aws_security_group.allow_all.id]
@@ -59,6 +59,7 @@ resource "aws_instance" "web" {
     Name = "HelloWorld"
   }
 }
+
 
 
 
@@ -130,6 +131,17 @@ resource "aws_vpn_connection" "main" {
 
 }
 
+
+resource "aws_vpn_gateway_route_propagation" "example" {
+  vpn_gateway_id = "${aws_vpn_gateway.vpn_gw.id}"
+  route_table_id = "${aws_vpc.main.default_route_table_id}"
+}
+
+
+resource "aws_vpn_connection_route" "the_lab" {
+  destination_cidr_block = "192.168.0.0/22"
+  vpn_connection_id      = "${aws_vpn_connection.main.id}"
+}
 //output "public_ip" {
 //  value = "${chomp(data.http.ifconfig.body)}"
 //}
