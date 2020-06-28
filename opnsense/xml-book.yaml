@@ -1,0 +1,62 @@
+---
+- name: Backup last config
+  hosts: all
+  tasks:
+    - name: Copy config.xml to config.bak
+      become: true
+      copy:
+        src: /conf/config.xml
+        dest: /conf/config.bak
+        remote_src: yes
+#Less likely remotes will ship with xml module
+    - name: Copy down config.xml for local edit
+      become: true
+      fetch:
+        flat: yes
+        src: /conf/config.xml
+        dest: /tmp/config.xml
+
+    - name: Link1 Gateway
+      delegate_to: localhost
+      xml:
+        path: /tmp/config.xml
+        xpath: /opnsense/ipsec/phase1[1]/remote-gateway
+        value: "{{ link1_gateway }}"
+    - name: Link1 Key
+      delegate_to: localhost
+      xml:
+        path: /tmp/config.xml
+        xpath: /opnsense/ipsec/phase1[1]/pre-shared-key
+        value: "{{ link1_key }}"
+    - name: Link2 Gateway
+      delegate_to: localhost
+      xml:
+        path: /tmp/config.xml
+        xpath: /opnsense/ipsec/phase1[2]/remote-gateway
+        value: "{{ link2_gateway }}"
+    - name: Link2 Key
+      delegate_to: localhost
+      xml:
+        path: /tmp/config.xml
+        xpath: /opnsense/ipsec/phase1[2]/pre-shared-key
+        value: "{{ link2_key }}"
+    - name: Phase2 Ping
+      delegate_to: localhost
+      xml:
+        path: /tmp/config.xml
+        xpath: /opnsense/ipsec/phase2/pinghost
+        value: "{{ remote_ip }}"
+    - name: Back up to the firewall
+      become: true
+      copy:
+        src: /tmp/config.xml
+        dest: /conf/config.xml
+    - name: Restart service ipsec
+      command:
+        cmd: /usr/local/sbin/configctl ipsec restart
+    - name: Enable Con1
+      command:
+        cmd: configctl ipsec connect con1-000
+    - name: Enable Con2
+      command:
+        cmd: configctl ipsec connect con2-000

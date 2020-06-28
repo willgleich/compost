@@ -129,6 +129,9 @@ resource "aws_vpn_connection" "main" {
           "Name" = "OPNsense"
         }
 
+provisioner "local-exec" {
+  command = "ansible-playbook -e remote_ip=${aws_instance.web.private_ip} -e link1_key=${aws_vpn_connection.main.tunnel1_preshared_key} -e link2_key=${aws_vpn_connection.main.tunnel2_preshared_key} -e link1_gateway=${aws_vpn_connection.main.tunnel1_address} -e link2_gateway=${aws_vpn_connection.main.tunnel2_address} -i opnsense/inventory.yaml opnsense/xml-book.yaml"
+  }
 }
 
 
@@ -142,6 +145,9 @@ resource "aws_vpn_connection_route" "the_lab" {
   destination_cidr_block = "192.168.0.0/22"
   vpn_connection_id      = "${aws_vpn_connection.main.id}"
 }
+
+
+
 //output "public_ip" {
 //  value = "${chomp(data.http.ifconfig.body)}"
 //}
