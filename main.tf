@@ -35,6 +35,7 @@ resource "aws_subnet" "maina" {
 
   tags = {
     Name = "Main"
+   "kubernetes.io/cluster/example" = "shared"
   }
 }
 
@@ -45,6 +46,7 @@ resource "aws_subnet" "mainb" {
 
   tags = {
     Name = "Main"
+    "kubernetes.io/cluster/example" = "shared"
   }
 }
 
@@ -70,6 +72,8 @@ resource "aws_subnet" "mainc" {
 
   tags = {
     Name = "Main"
+    "kubernetes.io/cluster/example" = "shared"
+
   }
 
 }
