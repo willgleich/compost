@@ -46,6 +46,7 @@ resource "aws_subnet" "mainb" {
 
   tags = {
     Name = "Main"
+    #TODO: Remove the hard tag here.
     "kubernetes.io/cluster/example" = "shared"
   }
 }
