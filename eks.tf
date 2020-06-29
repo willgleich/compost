@@ -1,3 +1,4 @@
+
 resource "aws_iam_role" "example" {
   name = "eks-cluster-example"
 
@@ -32,7 +33,7 @@ resource "aws_eks_cluster" "example" {
   role_arn = "${aws_iam_role.example.arn}"
 
   vpc_config {
-    subnet_ids = ["${aws_subnet.maina.id}", "${aws_subnet.mainb.id}", "${aws_subnet.mainc.id}"]
+    subnet_ids = ["${aws_subnet.maina.id}", "${aws_subnet.mainb.id}", "${aws_subnet.mainc.id}", aws_subnet.pubmainb.id]
     endpoint_public_access = false
     endpoint_private_access = true
   }

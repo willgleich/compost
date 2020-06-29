@@ -78,6 +78,7 @@ resource "aws_subnet" "pubmainb" {
 
   tags = {
     Name = "PubMain2b"
+    "kubernetes.io/role/elb" = "1"
   }
 }
 //
