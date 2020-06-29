@@ -51,21 +51,6 @@ resource "aws_subnet" "mainb" {
   }
 }
 
-resource "aws_instance" "web" {
-  ami           = "ami-06c119f12fa66b35b"
-  instance_type = "t2.nano"
-  subnet_id     = aws_subnet.mainb.id
-  vpc_security_group_ids = [aws_security_group.allow_all.id]
-//  security_groups = [aws_security_group.allow_all.id]
-  key_name = "OnPrem"
-  tags = {
-    Name = "HelloWorld"
-  }
-}
-
-
-
-
 resource "aws_subnet" "mainc" {
   vpc_id     = "${aws_vpc.main.id}"
   cidr_block = "10.0.3.0/24"
@@ -74,10 +59,39 @@ resource "aws_subnet" "mainc" {
   tags = {
     Name = "Main"
     "kubernetes.io/cluster/example" = "shared"
-
   }
-
 }
+//resource "aws_subnet" "pubmaina" {
+//  vpc_id     = "${aws_vpc.main.id}"
+//  cidr_block = "10.0.101.0/24"
+//  availability_zone = "us-west-2a"
+//
+//  tags = {
+//    Name = "PubMain2a"
+//  }
+//}
+
+resource "aws_subnet" "pubmainb" {
+  vpc_id     = "${aws_vpc.main.id}"
+  cidr_block = "10.0.102.0/24"
+  availability_zone = "us-west-2b"
+
+  tags = {
+    Name = "PubMain2b"
+  }
+}
+//
+//resource "aws_subnet" "pubmainc" {
+//  vpc_id     = "${aws_vpc.main.id}"
+//  cidr_block = "10.0.103.0/24"
+//  availability_zone = "us-west-2c"
+//
+//  tags = {
+//    Name = "PubMain2c"
+//  }
+//}
+
+
 
 resource "aws_customer_gateway" "main" {
   bgp_asn    = 65000
@@ -87,6 +101,19 @@ resource "aws_customer_gateway" "main" {
   tags = {
     Name = "main-customer-gateway"
   }
+}
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id  = aws_vpc.main.id
+}
+//
+resource "aws_eip" "nat" {
+  vpc = true
+}
+
+resource "aws_nat_gateway" "gw" {
+  allocation_id = "${aws_eip.nat.id}"
+  subnet_id     = "${aws_subnet.pubmainb.id}"
 }
 
 
@@ -143,12 +170,60 @@ provisioner "local-exec" {
 resource "aws_vpn_gateway_route_propagation" "example" {
   vpn_gateway_id = "${aws_vpn_gateway.vpn_gw.id}"
   route_table_id = "${aws_vpc.main.default_route_table_id}"
+
+  depends_on = [aws_vpn_connection.main]
 }
 
+resource "aws_default_route_table" "default" {
+  default_route_table_id = "${aws_vpc.main.default_route_table_id}"
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.gw.id
+  }
+
+  tags = {
+    Name = "default table"
+  }
+}
+
+resource "aws_route_table" "r" {
+  vpc_id = "${aws_vpc.main.id}"
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = "${aws_internet_gateway.gw.id}"
+  }
+
+
+  tags = {
+    Name = "Public to IG"
+  }
+}
+
+resource "aws_route_table_association" "r" {
+  route_table_id = "${aws_route_table.r.id}"
+  subnet_id = aws_subnet.pubmainb.id
+}
 
 resource "aws_vpn_connection_route" "the_lab" {
   destination_cidr_block = "192.168.0.0/22"
   vpn_connection_id      = "${aws_vpn_connection.main.id}"
+}
+
+
+
+resource "aws_instance" "web" {
+  ami           = "ami-06c119f12fa66b35b"
+  instance_type = "t2.nano"
+  subnet_id     = aws_subnet.mainc.id
+  vpc_security_group_ids = [aws_security_group.allow_all.id]
+//  security_groups = [aws_security_group.allow_all.id]
+  key_name = "OnPrem"
+  tags = {
+    Name = "HelloWorld"
+  }
+  depends_on = ["aws_internet_gateway.gw"]
 }
 
 

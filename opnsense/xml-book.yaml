@@ -53,10 +53,10 @@
         dest: /conf/config.xml
     - name: Restart service ipsec
       command:
-        cmd: /usr/local/sbin/configctl ipsec restart && configctl ipsec connect con1-000 && configctl ipsec connect con2-000
-#    - name: Enable Con1
-#      command:
-#        cmd:
-#    - name: Enable Con2
-#      command:
-#        cmd: configctl ipsec connect con2-000
+        cmd: /usr/local/sbin/configctl ipsec restart
+    - name: Enable Con1
+      command:
+        cmd: configctl ipsec connect con1-000
+    - name: Enable Con2
+      command:
+        cmd: configctl ipsec connect con2-000

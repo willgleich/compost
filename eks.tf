@@ -33,6 +33,8 @@ resource "aws_eks_cluster" "example" {
 
   vpc_config {
     subnet_ids = ["${aws_subnet.maina.id}", "${aws_subnet.mainb.id}", "${aws_subnet.mainc.id}"]
+    endpoint_public_access = false
+    endpoint_private_access = true
   }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
@@ -58,6 +60,9 @@ resource "aws_eks_node_group" "example" {
   node_role_arn   = aws_iam_role.example1.arn
   subnet_ids      = [aws_subnet.maina.id,aws_subnet.mainb.id,aws_subnet.mainc.id]
 
+         remote_access {
+           ec2_ssh_key               = "OnPrem"
+        }
   scaling_config {
     desired_size = 1
     max_size     = 1
