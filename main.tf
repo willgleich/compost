@@ -174,18 +174,23 @@ resource "aws_vpn_gateway_route_propagation" "example" {
   depends_on = [aws_vpn_connection.main]
 }
 
-resource "aws_default_route_table" "default" {
-  default_route_table_id = "${aws_vpc.main.default_route_table_id}"
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.gw.id
-  }
-
-  tags = {
-    Name = "default table"
-  }
+resource "aws_route" "nat_gateway" {
+  route_table_id = "${aws_vpc.main.default_route_table_id}"
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.gw.id
 }
+//resource "aws_default_route_table" "default" {
+//  default_route_table_id = "${aws_vpc.main.default_route_table_id}"
+//
+//  route {
+//    cidr_block = "0.0.0.0/0"
+//    nat_gateway_id = aws_nat_gateway.gw.id
+//  }
+//
+//  tags = {
+//    Name = "default table"
+//  }
+//}
 
 resource "aws_route_table" "r" {
   vpc_id = "${aws_vpc.main.id}"
