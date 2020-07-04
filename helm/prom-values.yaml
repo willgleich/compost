@@ -1,0 +1,18 @@
+grafana:
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - disableDeletion: true
+        editable: true
+        folder: Extra
+        name: extra
+        options:
+          path: /var/lib/grafana/dashboards/extra
+        orgId: 1
+        type: file
+  dashboards:
+    extra:
+      ingress-nginx:
+        datasource: Prometheus
+        gnetId: 9614

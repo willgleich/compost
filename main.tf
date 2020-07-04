@@ -238,6 +238,40 @@ resource "aws_instance" "web" {
   depends_on = ["aws_internet_gateway.gw"]
 }
 
+resource "aws_iam_role" "web_role" {
+  name = "web_role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+
+  tags = {
+      tag-key = "tag-value"
+  }
+}
+
+resource "aws_iam_instance_profile" "web-profile" {
+  name = "web-profile"
+  role = aws_iam_role.web_role.name
+}
+
+resource "aws_iam_policy_attachment" "web-admin-attachment" {
+  name = "web-admin-attachment"
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  roles = [aws_iam_role.web_role.name]
+}
 
 
 //output "public_ip" {
