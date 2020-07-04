@@ -18,3 +18,7 @@ output "instance_ip" {
   value = aws_instance.web.private_ip
 }
 
+output "nameservers" {
+  value = aws_route53_zone.private.name_servers
+}
+

@@ -126,8 +126,8 @@ resource "aws_vpn_gateway" "vpn_gw" {
   }
 }
 
-resource "aws_security_group" "allow_all" {
-  name        = "allow_all"
+resource "aws_security_group" "allow_some" {
+  name        = "allow_some"
   description = "Allow all inbound traffic"
   vpc_id      = "${aws_vpc.main.id}"
 
@@ -136,8 +136,15 @@ resource "aws_security_group" "allow_all" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-//    cidr_blocks = [aws_vpc.main.cidr_block]
-      cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [aws_vpc.main.cidr_block]
+//      cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    description = "all from OnPrem"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+      cidr_blocks = ["192.168.0.0/22"]
   }
 
   egress {
@@ -148,7 +155,7 @@ resource "aws_security_group" "allow_all" {
   }
 
   tags = {
-    Name = "allow_all"
+    Name = "allow_some"
   }
 }
 
@@ -229,13 +236,14 @@ resource "aws_instance" "web" {
   ami           = "ami-06c119f12fa66b35b"
   instance_type = "t2.nano"
   subnet_id     = aws_subnet.mainc.id
-  vpc_security_group_ids = [aws_security_group.allow_all.id]
-//  security_groups = [aws_security_group.allow_all.id]
+  vpc_security_group_ids = [aws_security_group.allow_some.id]
+//  security_groups = [aws_security_group.allow_some.id]
   key_name = "OnPrem"
   tags = {
     Name = "HelloWorld"
   }
   depends_on = ["aws_internet_gateway.gw"]
+  iam_instance_profile = aws_iam_instance_profile.web-profile.name
 }
 
 resource "aws_iam_role" "web_role" {
@@ -271,6 +279,7 @@ resource "aws_iam_policy_attachment" "web-admin-attachment" {
   name = "web-admin-attachment"
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
   roles = [aws_iam_role.web_role.name]
+  users = ["awscli", "vault"]
 }
 
 
