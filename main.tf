@@ -35,7 +35,7 @@ resource "aws_subnet" "maina" {
 
   tags = {
     Name = "Main"
-   "kubernetes.io/cluster/example" = "shared"
+//   "kubernetes.io/cluster/example" = "shared"
   }
 }
 
@@ -47,7 +47,7 @@ resource "aws_subnet" "mainb" {
   tags = {
     Name = "Main"
     #TODO: Remove the hard tag here.
-    "kubernetes.io/cluster/example" = "shared"
+//    "kubernetes.io/cluster/example" = "shared"
   }
 }
 
@@ -58,7 +58,7 @@ resource "aws_subnet" "mainc" {
 
   tags = {
     Name = "Main"
-    "kubernetes.io/cluster/example" = "shared"
+//    "kubernetes.io/cluster/${aws_eks_cluster.name}" = "shared"
   }
 }
 //resource "aws_subnet" "pubmaina" {
@@ -78,6 +78,7 @@ resource "aws_subnet" "pubmainb" {
 
   tags = {
     Name = "PubMain2b"
+    "kubernetes.io/role/elb" = "1"
   }
 }
 //
@@ -164,7 +165,13 @@ resource "aws_vpn_connection" "main" {
 provisioner "local-exec" {
   command = "ansible-playbook -e remote_ip=${aws_instance.web.private_ip} -e link1_key=${aws_vpn_connection.main.tunnel1_preshared_key} -e link2_key=${aws_vpn_connection.main.tunnel2_preshared_key} -e link1_gateway=${aws_vpn_connection.main.tunnel1_address} -e link2_gateway=${aws_vpn_connection.main.tunnel2_address} -i opnsense/inventory.yaml opnsense/xml-book.yaml"
   }
+
+provisioner "local-exec" {
+  command = "ansible-playbook -i opnsense/inventory.yaml opnsense/deactivate-ipsec.yaml"
+  when    = "destroy"
+ }
 }
+
 
 
 resource "aws_vpn_gateway_route_propagation" "example" {
@@ -174,18 +181,23 @@ resource "aws_vpn_gateway_route_propagation" "example" {
   depends_on = [aws_vpn_connection.main]
 }
 
-resource "aws_default_route_table" "default" {
-  default_route_table_id = "${aws_vpc.main.default_route_table_id}"
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.gw.id
-  }
-
-  tags = {
-    Name = "default table"
-  }
+resource "aws_route" "nat_gateway" {
+  route_table_id = "${aws_vpc.main.default_route_table_id}"
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.gw.id
 }
+//resource "aws_default_route_table" "default" {
+//  default_route_table_id = "${aws_vpc.main.default_route_table_id}"
+//
+//  route {
+//    cidr_block = "0.0.0.0/0"
+//    nat_gateway_id = aws_nat_gateway.gw.id
+//  }
+//
+//  tags = {
+//    Name = "default table"
+//  }
+//}
 
 resource "aws_route_table" "r" {
   vpc_id = "${aws_vpc.main.id}"
