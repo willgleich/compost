@@ -1,5 +1,5 @@
 # compost
-* for dust thou art, and unto dust shalt thou return *
+*for dust thou art, and unto dust shalt thou return*
 ## Goals
 
 The goals of the project are to create a compostable homelab extension in the cloud. Aiming for minimal configuration in order to connect local homelab to AWS.a

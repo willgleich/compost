@@ -1,0 +1,42 @@
+---
+- name: Backup last config
+  hosts: opn
+  vars:
+    ip: 192.168.2.207
+  vars_prompt:
+    - name: hostname
+      prompt: Hostname *.gleich.tech?
+  tasks:
+#Less likely remotes will ship with xml module
+    - name: Copy down config.xml for local edit
+      become: true
+      fetch:
+        flat: yes
+        src: /conf/config.xml
+        dest: /tmp/config.xml
+    - name: addDNS
+      delegate_to: localhost
+      xml:
+        path: /tmp/config.xml
+        xpath: /opnsense/unbound
+        add_children:
+          - hosts:
+              _:
+                - host: "{{ hostname }}"
+                - domain: "gleich.tech"
+                - rr: A
+                - ip: "{{ ip }}"
+                - mxprio:
+                - mx:
+                - descr:
+                - aliases:
+                    _:
+                      - item:
+    - name: Back up to the firewall
+      become: true
+      copy:
+        src: /tmp/config.xml
+        dest: /conf/config.xml
+    - name: Restart service unbound
+      command:
+        cmd: /usr/local/sbin/configctl unbound reload

@@ -1,0 +1,7 @@
+---
+- name: Backup last config
+  hosts: all
+  tasks:
+    - name: Restart service ipsec
+      command:
+        cmd: /usr/local/sbin/configctl ipsec stop

@@ -22,7 +22,8 @@ data "http" "ifconfig" {
 resource "aws_vpc" "main" {
   cidr_block       = "10.0.0.0/16"
   # instance_tenancy = "dedicated"
-
+  enable_dns_support = true
+  enable_dns_hostnames = true
   tags = {
     Name = "main"
   }
@@ -277,11 +278,25 @@ resource "aws_iam_instance_profile" "web-profile" {
 
 resource "aws_iam_policy_attachment" "web-admin-attachment" {
   name = "web-admin-attachment"
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  policy_arn = aws_iam_policy.iam-admin-policy.arn
   roles = [aws_iam_role.web_role.name]
-  users = ["awscli", "vault"]
 }
 
+resource "aws_iam_policy" "iam-admin-policy" {
+  name = "web-policy"
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "*",
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
 
 //output "public_ip" {
 //  value = "${chomp(data.http.ifconfig.body)}"
