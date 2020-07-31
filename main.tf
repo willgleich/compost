@@ -20,7 +20,7 @@ resource "aws_instance" "web" {
   ami           = "ami-06c119f12fa66b35b"
   instance_type = "t2.nano"
   subnet_id     = module.net.subnetc_id
-  vpc_security_group_ids = [aws_security_group.allow_some.id]
+  vpc_security_group_ids = [module.net.sg_id]
 //  security_groups = [aws_security_group.allow_some.id]
   key_name = "OnPrem"
 
@@ -83,10 +83,9 @@ EOF
 resource "aws_route53_record" "web" {
   name = "web"
   type = "A"
-  zone_id = aws_route53_zone.private.id
+  zone_id = module.net.route53_zoneid
   ttl = "6"
     records = [aws_instance.web.private_ip]
-
 }
 
 //output "public_ip" {

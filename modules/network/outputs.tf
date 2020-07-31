@@ -17,3 +17,11 @@ output "pubnetb_id" {
 output "vpc_id" {
   value = aws_vpc.main.id
 }
+
+output "route53_zoneid" {
+  value = aws_route53_zone.private.id
+}
+
+output "sg_id" {
+  value = aws_security_group.allow_some.id
+}
