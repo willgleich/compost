@@ -33,7 +33,7 @@ resource "aws_eks_cluster" "example" {
   role_arn = "${aws_iam_role.example.arn}"
 
   vpc_config {
-    subnet_ids = ["${aws_subnet.maina.id}", "${aws_subnet.mainb.id}", "${aws_subnet.mainc.id}", aws_subnet.pubmainb.id]
+    subnet_ids = ["${module.net.subneta_id}", "${module.net.subnetb_id}", "${module.net.subnetc_id}", module.net.pubnetb_id]
     endpoint_public_access = false
     endpoint_private_access = true
     security_group_ids = [aws_security_group.cluster-sg.id]
@@ -65,7 +65,7 @@ resource "aws_eks_node_group" "example" {
   cluster_name    = aws_eks_cluster.example.name
   node_group_name = "example"
   node_role_arn   = aws_iam_role.example1.arn
-  subnet_ids      = [aws_subnet.maina.id,aws_subnet.mainb.id,aws_subnet.mainc.id]
+  subnet_ids      = [module.net.subneta_id,module.net.subnetb_id,module.net.subnetc_id]
 
          remote_access {
            ec2_ssh_key               = "OnPrem"
@@ -121,7 +121,7 @@ resource "aws_iam_role_policy_attachment" "example-AmazonEC2ContainerRegistryRea
 resource "aws_security_group" "cluster-sg" {
   name        = "clusterSG"
   description = "Cluster communication with worker nodes"
-  vpc_id      =  aws_vpc.main.id
+  vpc_id      =  module.net.vpc_id
   egress {
     from_port   = 0
     to_port     = 0
