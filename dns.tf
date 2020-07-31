@@ -57,3 +57,8 @@ resource "aws_route53_resolver_rule" "fwd" {
   }
 
 }
+
+resource "aws_route53_resolver_rule_association" "outbound-dns" {
+  resolver_rule_id = aws_route53_resolver_rule.fwd.id
+  vpc_id = aws_vpc.main.id
+}
