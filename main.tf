@@ -24,7 +24,7 @@ resource "aws_instance" "web" {
 //  security_groups = [aws_security_group.allow_some.id]
   key_name = "OnPrem"
 
-  depends_on = ["aws_internet_gateway.gw"]
+  depends_on = [module.net]
   iam_instance_profile = aws_iam_instance_profile.web-profile.name
 }
 

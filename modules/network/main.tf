@@ -160,11 +160,11 @@ resource "aws_vpn_connection" "main" {
         }
 
 provisioner "local-exec" {
-  command = "ansible-playbook -e remote_ip=10.0.1.205 -e link1_key=${aws_vpn_connection.main.tunnel1_preshared_key} -e link2_key=${aws_vpn_connection.main.tunnel2_preshared_key} -e link1_gateway=${aws_vpn_connection.main.tunnel1_address} -e link2_gateway=${aws_vpn_connection.main.tunnel2_address} -i opnsense/inventory.yaml ../../opnsense/xml-book.yaml"
+  command = "ansible-playbook -e remote_ip=10.0.1.205 -e link1_key=${aws_vpn_connection.main.tunnel1_preshared_key} -e link2_key=${aws_vpn_connection.main.tunnel2_preshared_key} -e link1_gateway=${aws_vpn_connection.main.tunnel1_address} -e link2_gateway=${aws_vpn_connection.main.tunnel2_address} -i ${path.root}/opnsense/inventory.yaml ${path.root}//opnsense/xml-book.yaml"
   }
 
 provisioner "local-exec" {
-  command = "ansible-playbook -i opnsense/inventory.yaml opnsense/deactivate-ipsec.yaml"
+  command = "ansible-playbook -i ${path.root}/opnsense/inventory.yaml ${path.root}/opnsense/deactivate-ipsec.yaml"
   when    = "destroy"
  }
 }
