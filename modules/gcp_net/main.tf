@@ -40,7 +40,19 @@ resource "google_compute_vpn_gateway" "target_gateway" {
 
 resource "google_compute_network" "network1" {
   name = "vpc"
-  auto_create_subnetworks = true
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "network-with-private-secondary-ip-ranges" {
+  name          = "test-subnetwork"
+  ip_cidr_range = "10.128.0.0/16"
+  region        = "us-west3"
+  network       = google_compute_network.network1.id
+  private_ip_google_access = true
+//  secondary_ip_range {
+//    range_name    = "tf-test-secondary-range-update1"
+//    ip_cidr_range = "192.168.10.0/24"
+//  }
 }
 
 resource "google_compute_address" "vpn_static_ip" {
@@ -95,33 +107,3 @@ resource "google_compute_firewall" "default" {
   source_ranges = ["192.168.0.0/22",  "${chomp(data.http.ifconfig.body)}"]
 }
 
-
-resource "google_compute_instance" "kube" {
-  name         = "kube${count.index}"
-  machine_type = "g1-small"
-  count        = 1
-  zone         = "us-west2-a"
-  tags = ["foo", "bar"]
-
-  boot_disk {
-    initialize_params {
-      image = "centos-cloud/centos-7"
-    }
-  }
- network_interface {
-    network = google_compute_network.network1.name
-
-    access_config {
-      // Ephemeral IP
-    }
-  }
-
-  metadata = {
-    foo = "bar"
-    ssh-keys = "centos:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDPvDlf6TZbThqrwrpGQD935NGv1rq4MchkSz7dC36iHxES5ou5WWJQJXCjUTOTEn3Dm9PhQTQCvmLyz1g9RCkRYBe4FRT08r5jsJRIzdvq1IqnQOGrhOMy9FLsG8n9u7Msf31SnYMXicpUrA4teFEnX2pAu3/e11fEVzsv6moHgEqmQiI4LCJuf2HBAgrSHA4lyKzj50o4tqRp1uBzQ0bjiGbUqBPeptWLMlmEf4HMlTyOQFQ1xuY3h07eLiuaN5gDgcxSUzLaK2eCrG+HGHyTT8DBrGkvgsyMwqjsEG+SkWP2zh5/SR/Rx2uBuMvjgk2g5RNXWCCzNFb360Kwjhax mamba@Williams-MacBook-Air-2.local"
-  }
-
-  metadata_startup_script = "echo hi > /test.txt"
-
-
-}
