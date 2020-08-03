@@ -42,7 +42,7 @@ resource "google_compute_vpn_gateway" "target_gateway" {
 resource "google_compute_network" "network1" {
   name = "vpc"
   auto_create_subnetworks = false
-  delete_default_routes_on_create = true
+//  delete_default_routes_on_create =
 }
 
 resource "google_compute_subnetwork" "network-with-private-secondary-ip-ranges" {

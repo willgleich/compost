@@ -41,7 +41,6 @@ resource "google_compute_instance" "web" {
 
   metadata = {
     foo = "bar"
-    ssh-keys = "centos:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDPvDlf6TZbThqrwrpGQD935NGv1rq4MchkSz7dC36iHxES5ou5WWJQJXCjUTOTEn3Dm9PhQTQCvmLyz1g9RCkRYBe4FRT08r5jsJRIzdvq1IqnQOGrhOMy9FLsG8n9u7Msf31SnYMXicpUrA4teFEnX2pAu3/e11fEVzsv6moHgEqmQiI4LCJuf2HBAgrSHA4lyKzj50o4tqRp1uBzQ0bjiGbUqBPeptWLMlmEf4HMlTyOQFQ1xuY3h07eLiuaN5gDgcxSUzLaK2eCrG+HGHyTT8DBrGkvgsyMwqjsEG+SkWP2zh5/SR/Rx2uBuMvjgk2g5RNXWCCzNFb360Kwjhax mamba@Williams-MacBook-Air-2.local"
   }
 
   metadata_startup_script = "echo hi > /test.txt"
