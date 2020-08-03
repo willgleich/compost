@@ -22,8 +22,6 @@ resource "google_compute_vpn_tunnel" "tunnel1" {
   local_traffic_selector = ["10.128.0.0/9"]
 //  remote_traffic_selector = ["192.168.0.0/22"]
   remote_traffic_selector = ["0.0.0.0/0"]
-//  local_traffic_selector = ["0.0.0.0/0"]
-//  remote_traffic_selector = ["0.0.0.0/0"]
 
   depends_on = [
     google_compute_forwarding_rule.fr_esp,
@@ -86,21 +84,12 @@ resource "google_compute_forwarding_rule" "fr_udp4500" {
   target      = google_compute_vpn_gateway.target_gateway.id
 }
 
-resource "google_compute_route" "route1" {
-  name       = "route1"
-  network    = google_compute_network.network1.name
-  dest_range = "192.168.0.0/22"
-  priority   = 1000
-
-  next_hop_vpn_tunnel = google_compute_vpn_tunnel.tunnel1.id
-}
 
 resource "google_compute_route" "route2" {
-  name       = "route2"
+  name       = "internet-route"
   network    = google_compute_network.network1.name
   dest_range = "0.0.0.0/0"
   priority   = 1000
-
   next_hop_vpn_tunnel = google_compute_vpn_tunnel.tunnel1.id
 }
 
