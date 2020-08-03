@@ -5,3 +5,7 @@
 output "network_name" {
   value = google_compute_network.network1.name
 }
+
+output "subnet_name" {
+  value = google_compute_subnetwork.network-with-private-secondary-ip-ranges.self_link
+}

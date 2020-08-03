@@ -21,10 +21,9 @@ module "net" {
 resource "google_compute_instance" "web" {
   name         = "web"
 //    name         = "web${count.index}"
-
   machine_type = "g1-small"
 //  count        = 1
-  zone         = "us-west2-a"
+  zone         = "us-west3-a"
   tags = ["foo", "bar"]
 
   boot_disk {
@@ -34,10 +33,10 @@ resource "google_compute_instance" "web" {
   }
  network_interface {
     network = module.net.network_name
-
-    access_config {
-      // Ephemeral IP
-    }
+    subnetwork = module.net.subnet_name
+//    access_config {
+//      // Ephemeral IP
+//    }
   }
 
   metadata = {
