@@ -24,7 +24,7 @@ resource "google_compute_instance" "web" {
   machine_type = "g1-small"
 //  count        = 1
   zone         = "us-west3-a"
-  tags = ["foo", "bar"]
+  tags = ["onprem-nat"]
 
   boot_disk {
     initialize_params {
@@ -42,7 +42,6 @@ resource "google_compute_instance" "web" {
   metadata = {
     foo = "bar"
   }
-
   metadata_startup_script = "echo hi > /test.txt"
 
 

@@ -91,6 +91,7 @@ resource "google_compute_route" "route2" {
   dest_range = "0.0.0.0/0"
   priority   = 1000
   next_hop_vpn_tunnel = google_compute_vpn_tunnel.tunnel1.id
+  tags = ["onprem-nat"]
 }
 
 resource "google_compute_firewall" "default" {
