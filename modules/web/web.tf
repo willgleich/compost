@@ -74,3 +74,8 @@ resource "aws_route53_record" "web" {
   ttl = "6"
   records = [aws_instance.web[count.index].private_ip]
 }
+
+
+output "ip" {
+  value = aws_instance.web.*.private_ip
+}

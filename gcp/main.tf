@@ -34,9 +34,9 @@ resource "google_compute_instance" "web" {
  network_interface {
     network = module.net.network_name
     subnetwork = module.net.subnet_name
-//    access_config {
-//      // Ephemeral IP
-//    }
+    access_config {
+      // Ephemeral IP
+    }
   }
 
   metadata = {
