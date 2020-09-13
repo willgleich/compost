@@ -45,6 +45,15 @@
     - name: Enable Con3
       command:
         cmd: configctl ipsec connect con3
+    - name: delete route
+      become: true
+      ignore_errors: yes
+      command:
+        cmd: route del -net 10.128.0.0 10.253.0.2 255.255.0.0
+    - name: add route
+      become: true
+      command:
+        cmd: route add -net 10.128.0.0 10.253.0.2 255.255.0.0
 #    - name: Enable Con2
 #      command:
 #        cmd: configctl ipsec connect con2-000

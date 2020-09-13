@@ -4,6 +4,7 @@
 
 The goals of the project are to create a compostable homelab extension in the cloud. Aiming for minimal configuration in order to connect local homelab to AWS and GCP.
 Exploration has included NAT, Firewall and Routing modifications. Experimentation with "multi-cloud" in private network setting.
+Exploration of routing vs policy based IPSec VPN connections.
 
 Current functionality:
 

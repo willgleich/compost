@@ -24,7 +24,7 @@ resource "google_compute_instance" "web" {
   machine_type = "g1-small"
 //  count        = 1
   zone         = "us-west3-a"
-  tags = ["onprem-nat"]
+  tags = ["foo", "bar"]
 
   boot_disk {
     initialize_params {
@@ -34,14 +34,15 @@ resource "google_compute_instance" "web" {
  network_interface {
     network = module.net.network_name
     subnetwork = module.net.subnet_name
-    access_config {
-      // Ephemeral IP
-    }
+//    access_config {
+//      // Ephemeral IP
+//    }
   }
 
   metadata = {
     foo = "bar"
   }
+
   metadata_startup_script = "echo hi > /test.txt"
 
 

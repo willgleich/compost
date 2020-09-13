@@ -19,7 +19,8 @@ resource "google_compute_vpn_tunnel" "tunnel1" {
   shared_secret = random_password.password.result
 
   target_vpn_gateway = google_compute_vpn_gateway.target_gateway.id
-  local_traffic_selector = ["10.128.0.0/9"]
+  local_traffic_selector = ["0.0.0.0/0"]
+//  local_traffic_selector = ["10.128.0.0/9"]
 //  remote_traffic_selector = ["192.168.0.0/22"]
   remote_traffic_selector = ["0.0.0.0/0"]
 
@@ -84,20 +85,38 @@ resource "google_compute_forwarding_rule" "fr_udp4500" {
   target      = google_compute_vpn_gateway.target_gateway.id
 }
 
+//
+//resource "google_compute_route" "route2" {
+//  name       = "internet-route"
+//  network    = google_compute_network.network1.name
+//  dest_range = "0.0.0.0/0"
+//  priority   = 1000
+//  next_hop_vpn_tunnel = google_compute_vpn_tunnel.tunnel1.id
+//  tags = ["onprem-nat"]
+//}
 
-resource "google_compute_route" "route2" {
-  name       = "internet-route"
+resource "google_compute_route" "route3" {
+  name       = "onprem-route"
   network    = google_compute_network.network1.name
-  dest_range = "0.0.0.0/0"
+  dest_range = "192.168.0.0/20"
   priority   = 1000
   next_hop_vpn_tunnel = google_compute_vpn_tunnel.tunnel1.id
-  tags = ["onprem-nat"]
+//  tags = ["onprem-nat"]
+}
+
+resource "google_compute_route" "route4" {
+  name       = "onprem2-route"
+  network    = google_compute_network.network1.name
+  dest_range = "10.0.0.0/16"
+  priority   = 1000
+  next_hop_vpn_tunnel = google_compute_vpn_tunnel.tunnel1.id
+//  tags = ["onprem-nat"]
 }
 
 resource "google_compute_firewall" "default" {
   name    = "test-firewall"
   network = google_compute_network.network1.name
-
+  enable_logging = true
   allow {
     protocol = "icmp"
   }
@@ -107,6 +126,6 @@ resource "google_compute_firewall" "default" {
     ports    = ["0-65535"]
   }
 
-  source_ranges = ["192.168.0.0/22",  "${chomp(data.http.ifconfig.body)}"]
+  source_ranges = ["192.168.0.0/22",  "${chomp(data.http.ifconfig.body)}", "10.0.0.0/16"]
 }
 

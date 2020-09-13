@@ -220,6 +220,10 @@ resource "aws_vpn_connection_route" "the_lab" {
   vpn_connection_id      = "${aws_vpn_connection.main.id}"
 }
 
+resource "aws_vpn_connection_route" "gcp_net" {
+  destination_cidr_block = "10.128.0.0/9"
+  vpn_connection_id      = "${aws_vpn_connection.main.id}"
+}
 
 resource "aws_route53_zone" "private" {
   name = "aws.gleich.tech"
