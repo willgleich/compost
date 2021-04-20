@@ -23,7 +23,7 @@ resource "google_compute_instance" "web" {
 //    name         = "web${count.index}"
   machine_type = "g1-small"
 //  count        = 1
-  zone         = "us-west3-a"
+  zone         = "us-west3-b"
   tags = ["foo", "bar"]
 
   boot_disk {

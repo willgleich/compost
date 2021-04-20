@@ -20,7 +20,7 @@ resource "aws_vpc" "main" {
 
 resource "aws_subnet" "maina" {
   vpc_id     = "${aws_vpc.main.id}"
-  cidr_block = "10.0.1.0/24"
+  cidr_block = "10.0.0.0/16"
   availability_zone = "us-west-2a"
 
   tags = {
@@ -31,7 +31,7 @@ resource "aws_subnet" "maina" {
 
 resource "aws_subnet" "mainb" {
   vpc_id     = "${aws_vpc.main.id}"
-  cidr_block = "10.0.2.0/24"
+  cidr_block = "10.1.0.0/16"
   availability_zone = "us-west-2b"
 
   tags = {
@@ -43,7 +43,7 @@ resource "aws_subnet" "mainb" {
 
 resource "aws_subnet" "mainc" {
   vpc_id     = "${aws_vpc.main.id}"
-  cidr_block = "10.0.3.0/24"
+  cidr_block = "10.2.0.0/16"
   availability_zone = "us-west-2c"
 
   tags = {
@@ -61,16 +61,16 @@ resource "aws_subnet" "mainc" {
 //  }
 //}
 
-resource "aws_subnet" "pubmainb" {
-  vpc_id     = "${aws_vpc.main.id}"
-  cidr_block = "10.0.102.0/24"
-  availability_zone = "us-west-2b"
-
-  tags = {
-    Name = "PubMain2b"
-    "kubernetes.io/role/elb" = "1"
-  }
-}
+//resource "aws_subnet" "pubmainb" {
+//  vpc_id     = "${aws_vpc.main.id}"
+//  cidr_block = "10.0.102.0/24"
+//  availability_zone = "us-west-2b"
+//
+//  tags = {
+//    Name = "PubMain2b"
+//    "kubernetes.io/role/elb" = "1"
+//  }
+//}
 //
 //resource "aws_subnet" "pubmainc" {
 //  vpc_id     = "${aws_vpc.main.id}"
@@ -93,19 +93,21 @@ resource "aws_customer_gateway" "main" {
     Name = "main-customer-gateway"
   }
 }
-
-resource "aws_internet_gateway" "gw" {
-  vpc_id  = aws_vpc.main.id
-}
 //
-resource "aws_eip" "nat" {
-  vpc = true
-}
-
-resource "aws_nat_gateway" "gw" {
-  allocation_id = "${aws_eip.nat.id}"
-  subnet_id     = "${aws_subnet.pubmainb.id}"
-}
+//resource "aws_internet_gateway" "gw" {
+//  vpc_id  = aws_vpc.main.id
+//}
+////
+//resource "aws_eip" "nat" {
+//
+//  vpc = true
+//}
+//
+//resource "aws_nat_gateway" "gw" {
+//
+//  allocation_id = "${aws_eip.nat.id}"
+//  subnet_id     = "${aws_subnet.pubmainb.id}"
+//}
 
 
 resource "aws_vpn_gateway" "vpn_gw" {
@@ -181,7 +183,8 @@ resource "aws_vpn_gateway_route_propagation" "example" {
 resource "aws_route" "nat_gateway" {
   route_table_id = "${aws_vpc.main.default_route_table_id}"
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id = aws_nat_gateway.gw.id
+  gateway_id = aws_vpn_gateway.vpn_gw.id
+//  nat_gateway_id = aws_nat_gateway.gw.id
 }
 //resource "aws_default_route_table" "default" {
 //  default_route_table_id = "${aws_vpc.main.default_route_table_id}"
@@ -201,7 +204,7 @@ resource "aws_route_table" "r" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.gw.id}"
+    gateway_id = aws_vpn_gateway.vpn_gw.id
   }
 
 
@@ -210,10 +213,10 @@ resource "aws_route_table" "r" {
   }
 }
 
-resource "aws_route_table_association" "r" {
-  route_table_id = "${aws_route_table.r.id}"
-  subnet_id = aws_subnet.pubmainb.id
-}
+//resource "aws_route_table_association" "r" {
+//  route_table_id = "${aws_route_table.r.id}"
+//  subnet_id = aws_subnet.pubmainb.id
+//}
 
 resource "aws_vpn_connection_route" "the_lab" {
   destination_cidr_block = "192.168.0.0/22"
@@ -221,64 +224,66 @@ resource "aws_vpn_connection_route" "the_lab" {
 }
 
 resource "aws_vpn_connection_route" "gcp_net" {
-  destination_cidr_block = "10.128.0.0/9"
+  destination_cidr_block = "10.128.0.0/16"
   vpn_connection_id      = "${aws_vpn_connection.main.id}"
 }
 
-resource "aws_route53_zone" "private" {
-  name = "aws.gleich.tech"
+//
+//## DNS
+//resource "aws_route53_zone" "private" {
+//  name = "aws.gleich.tech"
+//
+//  vpc {
+//    vpc_id = "${aws_vpc.main.id}"
+//  }
+//}
+//
+//
+//
+//resource "aws_route53_resolver_endpoint" "opn-in" {
+//  direction = "INBOUND"
+//  security_group_ids = [aws_security_group.allow_some.id]
+//  name = "inbound-ep"
+//    ip_address {
+//        ip        = "10.0.1.205"
+//        subnet_id = aws_subnet.maina.id
+//    }
+//    ip_address {
+//        ip        = "10.0.2.10"
+//        subnet_id = aws_subnet.mainb.id
+//    }
+//
+//}
+//
+//
+//resource "aws_route53_resolver_endpoint" "opn-out" {
+//  direction = "OUTBOUND"
+//  security_group_ids = [aws_security_group.allow_some.id]
+//  name = "outbound-ep"
+//    ip_address {
+////        ip        = "10.0.2.173"
+//        subnet_id = aws_subnet.mainb.id
+//    }
+//    ip_address {
+////        ip        = "10.0.3.105"
+//        subnet_id = aws_subnet.mainc.id
+//    }
+//
+//}
+//
+//resource "aws_route53_resolver_rule" "fwd" {
+//  domain_name          = "gleich.tech"
+//  name                 = "fwd to opnsense"
+//  rule_type            = "FORWARD"
+//  resolver_endpoint_id = "${aws_route53_resolver_endpoint.opn-out.id}"
+//
+//  target_ip {
+//    ip = "192.168.1.1"
+//  }
+//
+//}
 
-  vpc {
-    vpc_id = "${aws_vpc.main.id}"
-  }
-}
-
-
-
-resource "aws_route53_resolver_endpoint" "opn-in" {
-  direction = "INBOUND"
-  security_group_ids = [aws_security_group.allow_some.id]
-  name = "inbound-ep"
-    ip_address {
-        ip        = "10.0.1.205"
-        subnet_id = aws_subnet.maina.id
-    }
-    ip_address {
-        ip        = "10.0.2.10"
-        subnet_id = aws_subnet.mainb.id
-    }
-
-}
-
-
-resource "aws_route53_resolver_endpoint" "opn-out" {
-  direction = "OUTBOUND"
-  security_group_ids = [aws_security_group.allow_some.id]
-  name = "outbound-ep"
-    ip_address {
-//        ip        = "10.0.2.173"
-        subnet_id = aws_subnet.mainb.id
-    }
-    ip_address {
-//        ip        = "10.0.3.105"
-        subnet_id = aws_subnet.mainc.id
-    }
-
-}
-
-resource "aws_route53_resolver_rule" "fwd" {
-  domain_name          = "gleich.tech"
-  name                 = "fwd to opnsense"
-  rule_type            = "FORWARD"
-  resolver_endpoint_id = "${aws_route53_resolver_endpoint.opn-out.id}"
-
-  target_ip {
-    ip = "192.168.1.1"
-  }
-
-}
-
-resource "aws_route53_resolver_rule_association" "outbound-dns" {
-  resolver_rule_id = aws_route53_resolver_rule.fwd.id
-  vpc_id = aws_vpc.main.id
-}
+//resource "aws_route53_resolver_rule_association" "outbound-dns" {
+//  resolver_rule_id = aws_route53_resolver_rule.fwd.id
+//  vpc_id = aws_vpc.main.id
+//}

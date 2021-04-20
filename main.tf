@@ -24,14 +24,14 @@ module "web" {
   subnetc_id =  module.net.subnetc_id
 }
 
-module "eks" {
-  source = "./modules/eks_mod"
-  pubnetb_id = module.net.pubnetb_id
-  subneta_id = module.net.subneta_id
-  subnetb_id = module.net.subnetb_id
-  subnetc_id = module.net.subnetc_id
-  vpc_id = module.net.vpc_id
-}
+//module "eks" {
+//  source = "./modules/eks_mod"
+//  pubnetb_id = module.net.pubnetb_id
+//  subneta_id = module.net.subneta_id
+//  subnetb_id = module.net.subnetb_id
+//  subnetc_id = module.net.subnetc_id
+//  vpc_id = module.net.vpc_id
+//}
 //output "public_ip" {
 //  value = "${chomp(data.http.ifconfig.body)}"
 //}
