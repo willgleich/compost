@@ -20,7 +20,7 @@ resource "aws_vpc" "main" {
 
 resource "aws_subnet" "maina" {
   vpc_id     = "${aws_vpc.main.id}"
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "10.0.0.0/19"
   availability_zone = "us-west-2a"
 
   tags = {
@@ -31,7 +31,7 @@ resource "aws_subnet" "maina" {
 
 resource "aws_subnet" "mainb" {
   vpc_id     = "${aws_vpc.main.id}"
-  cidr_block = "10.1.0.0/16"
+  cidr_block = "10.0.32.0/19"
   availability_zone = "us-west-2b"
 
   tags = {
@@ -43,7 +43,7 @@ resource "aws_subnet" "mainb" {
 
 resource "aws_subnet" "mainc" {
   vpc_id     = "${aws_vpc.main.id}"
-  cidr_block = "10.2.0.0/16"
+  cidr_block = "10.0.64.0/19"
   availability_zone = "us-west-2c"
 
   tags = {
@@ -230,60 +230,60 @@ resource "aws_vpn_connection_route" "gcp_net" {
 
 //
 //## DNS
-//resource "aws_route53_zone" "private" {
-//  name = "aws.gleich.tech"
-//
-//  vpc {
-//    vpc_id = "${aws_vpc.main.id}"
-//  }
-//}
-//
-//
-//
-//resource "aws_route53_resolver_endpoint" "opn-in" {
-//  direction = "INBOUND"
-//  security_group_ids = [aws_security_group.allow_some.id]
-//  name = "inbound-ep"
-//    ip_address {
-//        ip        = "10.0.1.205"
-//        subnet_id = aws_subnet.maina.id
-//    }
-//    ip_address {
-//        ip        = "10.0.2.10"
-//        subnet_id = aws_subnet.mainb.id
-//    }
-//
-//}
-//
-//
-//resource "aws_route53_resolver_endpoint" "opn-out" {
-//  direction = "OUTBOUND"
-//  security_group_ids = [aws_security_group.allow_some.id]
-//  name = "outbound-ep"
-//    ip_address {
-////        ip        = "10.0.2.173"
-//        subnet_id = aws_subnet.mainb.id
-//    }
-//    ip_address {
-////        ip        = "10.0.3.105"
-//        subnet_id = aws_subnet.mainc.id
-//    }
-//
-//}
-//
-//resource "aws_route53_resolver_rule" "fwd" {
-//  domain_name          = "gleich.tech"
-//  name                 = "fwd to opnsense"
-//  rule_type            = "FORWARD"
-//  resolver_endpoint_id = "${aws_route53_resolver_endpoint.opn-out.id}"
-//
-//  target_ip {
-//    ip = "192.168.1.1"
-//  }
-//
-//}
+resource "aws_route53_zone" "private" {
+  name = "aws.gleich.tech"
 
-//resource "aws_route53_resolver_rule_association" "outbound-dns" {
-//  resolver_rule_id = aws_route53_resolver_rule.fwd.id
-//  vpc_id = aws_vpc.main.id
-//}
+  vpc {
+    vpc_id = "${aws_vpc.main.id}"
+  }
+}
+
+
+
+resource "aws_route53_resolver_endpoint" "opn-in" {
+  direction = "INBOUND"
+  security_group_ids = [aws_security_group.allow_some.id]
+  name = "inbound-ep"
+    ip_address {
+        ip        = "10.0.1.205"
+        subnet_id = aws_subnet.maina.id
+    }
+    ip_address {
+        ip        = "10.0.32.10"
+        subnet_id = aws_subnet.mainb.id
+    }
+
+}
+
+
+resource "aws_route53_resolver_endpoint" "opn-out" {
+  direction = "OUTBOUND"
+  security_group_ids = [aws_security_group.allow_some.id]
+  name = "outbound-ep"
+    ip_address {
+//        ip        = "10.0.2.173"
+        subnet_id = aws_subnet.mainb.id
+    }
+    ip_address {
+//        ip        = "10.0.3.105"
+        subnet_id = aws_subnet.mainc.id
+    }
+
+}
+
+resource "aws_route53_resolver_rule" "fwd" {
+  domain_name          = "gleich.tech"
+  name                 = "fwd to opnsense"
+  rule_type            = "FORWARD"
+  resolver_endpoint_id = "${aws_route53_resolver_endpoint.opn-out.id}"
+
+  target_ip {
+    ip = "192.168.1.1"
+  }
+
+}
+
+resource "aws_route53_resolver_rule_association" "outbound-dns" {
+  resolver_rule_id = aws_route53_resolver_rule.fwd.id
+  vpc_id = aws_vpc.main.id
+}

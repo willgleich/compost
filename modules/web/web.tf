@@ -6,7 +6,7 @@ resource "aws_instance" "web" {
   vpc_security_group_ids = [var.sg_id]
   count = var.servers
 //  security_groups = [aws_security_group.allow_some.id]
-  key_name = "OnPrem"
+  key_name = "mamba"
   tags          = {
     Name        = "web${count.index}"
     Environment = "production"

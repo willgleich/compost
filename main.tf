@@ -15,14 +15,14 @@ module "net" {
   source = "./modules/network"
 }
 
-module "web" {
-  servers = 1
-  source = "./modules/web"
-//  index = count.index
-  route53_zoneid = module.net.route53_zoneid
-  sg_id = module.net.sg_id
-  subnetc_id =  module.net.subnetc_id
-}
+//module "web" {
+//  servers = 1
+//  source = "./modules/web"
+////  index = count.index
+//  route53_zoneid = module.net.route53_zoneid
+//  sg_id = module.net.sg_id
+//  subnetc_id =  module.net.subnetc_id
+//}
 
 //module "eks" {
 //  source = "./modules/eks_mod"

@@ -44,7 +44,7 @@
         cmd: /usr/local/sbin/configctl ipsec restart
     - name: Enable Con3
       command:
-        cmd: configctl ipsec connect con3
+        cmd: configctl ipsec connect con1
     - name: delete route
       become: true
       ignore_errors: yes

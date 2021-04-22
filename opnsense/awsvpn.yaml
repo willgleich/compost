@@ -20,25 +20,25 @@
       delegate_to: localhost
       xml:
         path: /tmp/config.xml
-        xpath: /opnsense/ipsec/phase1[1]/remote-gateway
+        xpath: /opnsense/ipsec/phase1[2]/remote-gateway
         value: "{{ link1_gateway }}"
     - name: Link1 Key
       delegate_to: localhost
       xml:
         path: /tmp/config.xml
-        xpath: /opnsense/ipsec/phase1[1]/pre-shared-key
+        xpath: /opnsense/ipsec/phase1[2]/pre-shared-key
         value: "{{ link1_key }}"
     - name: Link2 Gateway
       delegate_to: localhost
       xml:
         path: /tmp/config.xml
-        xpath: /opnsense/ipsec/phase1[2]/remote-gateway
+        xpath: /opnsense/ipsec/phase1[3]/remote-gateway
         value: "{{ link2_gateway }}"
     - name: Link2 Key
       delegate_to: localhost
       xml:
         path: /tmp/config.xml
-        xpath: /opnsense/ipsec/phase1[2]/pre-shared-key
+        xpath: /opnsense/ipsec/phase1[3]/pre-shared-key
         value: "{{ link2_key }}"
     - name: Phase2 Ping
       delegate_to: localhost
@@ -54,9 +54,9 @@
     - name: Restart service ipsec
       command:
         cmd: /usr/local/sbin/configctl ipsec restart
-    - name: Enable Con1
-      command:
-        cmd: configctl ipsec connect con1-000
     - name: Enable Con2
       command:
         cmd: configctl ipsec connect con2-000
+    - name: Enable Con3
+      command:
+        cmd: configctl ipsec connect con3-000
