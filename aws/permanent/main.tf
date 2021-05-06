@@ -12,12 +12,12 @@ provider "aws" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "one" {
-//  for_each = toset([for i in [1,3,5,10,20,30,40,50,60,70]: tostring(i)])
+  for_each = toset([for i in [0.25, 0.5, 1,3,5,10,20,30,40,50,60,70]: tostring(i)])
   actions_enabled           = true
   alarm_actions             = [
     "arn:aws:sns:us-east-1:516873755856:me",
   ]
-  alarm_name                = "BillingAlert$1"
+  alarm_name                = "BillingAlert${each.value}"
   comparison_operator       = "GreaterThanOrEqualToThreshold"
   datapoints_to_alarm       = 1
   dimensions                = {
@@ -29,6 +29,6 @@ resource "aws_cloudwatch_metric_alarm" "one" {
   namespace                 = "AWS/Billing"
   period                    = 21600
   statistic                 = "Maximum"
-  threshold                 = 0.25
+  threshold                 = each.value
   treat_missing_data        = "missing"
 }
