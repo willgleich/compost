@@ -2,3 +2,4 @@
 .idea/
 *.tfstate
 *.backup
+main.json
