@@ -43,7 +43,7 @@ resource "google_compute_vpn_gateway" "target_gateway" {
 resource "google_compute_network" "network1" {
   name = "vpc"
   auto_create_subnetworks = false
-//  delete_default_routes_on_create =
+  delete_default_routes_on_create = true
 }
 
 resource "google_compute_subnetwork" "network-with-private-secondary-ip-ranges" {
@@ -84,6 +84,28 @@ resource "google_compute_forwarding_rule" "fr_udp4500" {
   ip_address  = google_compute_address.vpn_static_ip.address
   target      = google_compute_vpn_gateway.target_gateway.id
 }
+
+
+
+//resource "google_compute_route" "route1" {
+//  name       = "localroute"
+//  network    = google_compute_network.network1.name
+//  dest_range = "10.128.0.0/16"
+//  priority   = 0
+////  next_hop_network = google_compute_network.network1.id
+//  tags = ["onprem-nat"]
+//}
+
+
+resource "google_compute_route" "route2" {
+  name       = "internet-route"
+  network    = google_compute_network.network1.name
+  dest_range = "0.0.0.0/0"
+  priority   = 0
+  next_hop_vpn_tunnel = google_compute_vpn_tunnel.tunnel1.id
+  tags = ["onprem-nat"]
+}
+
 
 //
 //resource "google_compute_route" "route2" {
@@ -129,3 +151,19 @@ resource "google_compute_firewall" "default" {
   source_ranges = ["192.168.0.0/22",  "${chomp(data.http.ifconfig.body)}", "10.0.0.0/16"]
 }
 
+//resource "google_compute_firewall" "egress" {
+//  name    = "test-egress-firewall"
+//  network = google_compute_network.network1.name
+//  enable_logging = true
+//  direction = "EGRESS"
+//  allow {
+//    protocol = "icmp"
+//  }
+//
+//  allow {
+//    protocol = "tcp"
+//    ports    = ["0-65535"]
+//  }
+//
+//  destination_ranges = ["0.0.0.0/0"]
+//}

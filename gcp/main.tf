@@ -1,16 +1,15 @@
 provider "google" {
-  credentials = "main.json"
+  credentials = "/Users/will/.gcloud/main-285019-d0558d0d5b74.json"
 
   project = "main-285019"
   region  = "us-west3"
 }
 
 terraform {
-  backend "consul" {
-    address = "consul.gleich.tech"
-    scheme  = "https"
-    path    = "tf/gke/network"
-  }
+    backend "gcs" {
+      bucket = "gleich-infra"
+      prefix =  "tf/gke/network"
+    }
 }
 
 module "net" {
@@ -23,7 +22,7 @@ resource "google_compute_instance" "web" {
 //    name         = "web${count.index}"
   machine_type = "g1-small"
 //  count        = 1
-  zone         = "us-west3-b"
+  zone         = "us-west3-c"
   tags = ["foo", "bar"]
 
   boot_disk {
