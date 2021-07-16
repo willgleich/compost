@@ -101,9 +101,9 @@ resource "google_compute_route" "route2" {
   name       = "internet-route"
   network    = google_compute_network.network1.name
   dest_range = "0.0.0.0/0"
-  priority   = 0
+  priority   = 1000
   next_hop_vpn_tunnel = google_compute_vpn_tunnel.tunnel1.id
-  tags = ["onprem-nat"]
+//  tags = ["onprem-nat"]
 }
 
 
@@ -151,19 +151,19 @@ resource "google_compute_firewall" "default" {
   source_ranges = ["192.168.0.0/22",  "${chomp(data.http.ifconfig.body)}", "10.0.0.0/16"]
 }
 
-//resource "google_compute_firewall" "egress" {
-//  name    = "test-egress-firewall"
-//  network = google_compute_network.network1.name
-//  enable_logging = true
-//  direction = "EGRESS"
-//  allow {
-//    protocol = "icmp"
-//  }
-//
-//  allow {
-//    protocol = "tcp"
-//    ports    = ["0-65535"]
-//  }
-//
-//  destination_ranges = ["0.0.0.0/0"]
-//}
+resource "google_compute_firewall" "egress" {
+  name    = "test-egress-firewall"
+  network = google_compute_network.network1.name
+  enable_logging = true
+  direction = "EGRESS"
+  allow {
+    protocol = "icmp"
+  }
+
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]
+  }
+
+  destination_ranges = ["0.0.0.0/0"]
+}
