@@ -41,7 +41,6 @@ resource "google_container_cluster" "primary" {
     enable_private_endpoint = true
     enable_private_nodes = true
     master_ipv4_cidr_block = "10.128.16.0/28"
-    peering_name = "${var.cluster_name}-peering"
   }
   ip_allocation_policy {
     cluster_ipv4_cidr_block = "172.16.0.0/16"
@@ -53,7 +52,7 @@ resource "google_compute_network_peering_routes_config" "peering" {
   export_custom_routes = true
   import_custom_routes = false
   network              = var.network_name
-  peering              = "${var.cluster_name}-peering"
+  peering              = google_container_cluster.primary.private_cluster_config[0].peering_name
 
   depends_on = [google_container_cluster.primary]
 }
