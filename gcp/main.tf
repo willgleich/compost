@@ -14,6 +14,7 @@ terraform {
 
 module "net" {
   source = "../modules/gcp_net"
+  vpc_name = "home"
 }
 
 
@@ -50,3 +51,10 @@ resource "google_compute_instance" "web" {
 output "ip" {
   value = google_compute_instance.web.network_interface
 }
+
+module "gke" {
+  source = "../modules/gke"
+  network_name = module.net.network_name
+  subnet_name = module.net.subnet_name
+}
+

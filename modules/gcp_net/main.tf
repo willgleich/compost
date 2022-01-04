@@ -7,7 +7,7 @@ data "http" "ifconfig" {
 }
 
 resource "random_password" "password" {
-  length = 16
+  length = 36
   special = true
   override_special = "!"
 }
@@ -41,22 +41,34 @@ resource "google_compute_vpn_gateway" "target_gateway" {
 }
 
 resource "google_compute_network" "network1" {
-  name = "vpc"
+  name = var.vpc_name
   auto_create_subnetworks = false
   delete_default_routes_on_create = true
 }
 
-resource "google_compute_subnetwork" "network-with-private-secondary-ip-ranges" {
-  name          = "test-subnetwork"
-  ip_cidr_range = "10.128.0.0/16"
+resource "google_compute_subnetwork" "net-a" {
+  name          = "${var.vpc_name}-subnet-a"
+  ip_cidr_range = "10.128.0.0/20"
   region        = "us-west3"
   network       = google_compute_network.network1.id
   private_ip_google_access = true
-//  secondary_ip_range {
-//    range_name    = "tf-test-secondary-range-update1"
-//    ip_cidr_range = "192.168.10.0/24"
-//  }
+#  secondary_ip_range {
+#    range_name    = "secondary-range"
+#    ip_cidr_range = "192.168.10.0/24"
+#  }
 }
+#
+#resource "google_compute_subnetwork" "netb" {
+#  name          = "${var.vpc_name}-subnet"
+#  ip_cidr_range = "10.128.0.0/16"
+#  region        = "us-west3-a"
+#  network       = google_compute_network.network1.id
+#  private_ip_google_access = true
+#  //  secondary_ip_range {
+#  //    range_name    = "tf-test-secondary-range-update1"
+#  //    ip_cidr_range = "192.168.10.0/24"
+#  //  }
+#}
 
 resource "google_compute_address" "vpn_static_ip" {
   name = "vpn-static-ip"
@@ -167,3 +179,70 @@ resource "google_compute_firewall" "egress" {
 
   destination_ranges = ["0.0.0.0/0"]
 }
+
+#resource "google_compute_global_address" "private_ip_alloc" {
+#  name          = "private-ip-alloc"
+#  purpose       = "VPC_PEERING"
+#  address_type  = "INTERNAL"
+#  prefix_length = 16
+#  network       = google_compute_network.network1.id
+#}
+#
+#resource "google_service_networking_connection" "foobar" {
+#  network                 = google_compute_network.network1.id
+#  service                 = "storage.googleapis.com"
+#  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
+#}
+
+
+resource "google_compute_global_address" "default" {
+#  provider      = google-beta
+  project       = google_compute_network.network1.project
+  name          = "global-psconnect-ip"
+  address_type  = "INTERNAL"
+  purpose       = "PRIVATE_SERVICE_CONNECT"
+  network       = google_compute_network.network1.id
+  address       = "10.128.255.6"
+
+  depends_on = [google_compute_subnetwork.net-a]
+}
+
+resource "google_compute_global_forwarding_rule" "default" {
+#  provider      = google-beta
+  project       = google_compute_network.network1.project
+  name          = "globalrule"
+  target        = "all-apis"
+  network       = google_compute_network.network1.id
+  ip_address    = google_compute_global_address.default.id
+  load_balancing_scheme = ""
+  depends_on = [google_compute_subnetwork.net-a]
+}
+
+resource "google_dns_managed_zone" "example-zone" {
+  name        = "example-zone"
+  dns_name    = "googleapis.com."
+  description = "Example DNS zone"
+
+  visibility = "private"
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.network1.id
+    }
+  }
+
+  }
+
+resource "google_dns_record_set" "endpoint" {
+  managed_zone = google_dns_managed_zone.example-zone.name
+  name         = "googleapis.com."
+  type         = "A"
+  rrdatas = [google_compute_global_address.default.address]
+}
+
+resource "google_dns_record_set" "wildcard" {
+  managed_zone = google_dns_managed_zone.example-zone.name
+  name         = "*.googleapis.com."
+  type         = "CNAME"
+  rrdatas = ["googleapis.com."]
+}
+
